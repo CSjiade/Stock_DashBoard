@@ -2,17 +2,11 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import yfinance as yf
-from PIL import Image
 import backtrader as bt
 import backtrader.analyzers as btanalysis
-import time
 from datetime import datetime,timedelta
-import seaborn as sns
-import matplotlib as plt
 import matplotlib.pyplot as pt
 import base64
-from PIL import Image
-import requests
 from PIL import Image
 import requests
 from io import BytesIO
