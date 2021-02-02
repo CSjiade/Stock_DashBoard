@@ -5,6 +5,9 @@ name = "pypi"
 
 [packages]
 yfinance = "*"
+pandas = "*"
+backtrader = "*"
+streamlit = "*"
 
 [dev-packages]
 
