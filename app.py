@@ -40,6 +40,7 @@ def plot_price_volume(period,interval,data):
     st.write("Stock Data")
     stock_data = stock_data.reset_index()
     st.write(stock_data)
+
     download_interface(stock_data,stock_ticker)
 
 
@@ -53,6 +54,7 @@ def plot_price_volume_2(start, end, interval, data):
     st.write("Stock Data")
     stock_data = stock_data.reset_index()
     st.write(stock_data)
+
     fig = pt.figure(figsize=(20, 10))
     fast = stock_data.Close.rolling(window = int(mv_fast)).mean()
     slow = stock_data.Close.rolling(window = int (mv_slow)).mean()
@@ -73,6 +75,7 @@ def plot_price_volume_3(start,interval,data):
     st.write("Stock Data")
     stock_data = stock_data.reset_index()
     st.write(stock_data)
+
     fig = pt.figure(figsize=(20, 10))
     fast = stock_data.Close.rolling(window = int(mv_fast)).mean()
     slow = stock_data.Close.rolling(window = int (mv_slow)).mean()
