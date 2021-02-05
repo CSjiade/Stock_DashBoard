@@ -305,8 +305,6 @@ def RSI_strategy(start, end, stock_bt,cerebro,initial_amt, size, ticker,buy_n_ho
     RSI_Exit = st.sidebar.text_input("RSI Exit Number",70)
     RSI_Period = st.sidebar.text_input("RSI Period", 14)
 
-    a = []
-
 
     class RSIStrategy(bt.Strategy):
 
@@ -497,5 +495,3 @@ if __name__ == '__main__':
     backtest_options = ['SMA','Simple RSI']
     backtest_options= st.sidebar.selectbox("Strategies", backtest_options)
     backtest(backtest_options, stock_bt, ticker)
-
-
