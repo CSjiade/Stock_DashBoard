@@ -181,7 +181,7 @@ def SMA_strategy(start, end, stock_bt,cerebro,initial_amt,size, ticker, buy_n_ho
     end = end
     start_date = datetime.strptime(start,'%Y-%m-%d')
     end_date = datetime.strptime(end,'%Y-%m-%d')
-    data = bt.feeds.YahooFinanceData(dataname=ticker,fromdate = start_date, todate = end_date)
+    data = bt.feeds.YahooFinanceData(dataname=ticker,fromdate = start_date+timedelta(1), todate = end_date)
     back = cerebro_run(cerebro,data,Cross_MA,initial_amt, size)
     SMA_Visualisation(back,start,end,stock_bt,cerebro)
 
@@ -256,6 +256,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
 
     transaction = back[0].analyzers.transaction.get_analysis()
 
+
     date_column = []
     for date in list(transaction.keys()):
         date = datetime.strftime(date,"%Y-%m-%d")
@@ -279,10 +280,10 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
         else:
             sell +=1;
 
+
     transaction_data = {'date':date_column ,'Price': Price,'Quantity':Qty,'trade_pnl': Cash_change}
-    df_transaction =pd.DataFrame(data=transaction_data)
+    df_transaction = pd.DataFrame(data=transaction_data)
     st.write('Trade Records')
-    st.write(df_transaction)
 
     returns = list(returns.values())[0]
     returns_pct = returns*100
@@ -290,7 +291,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
     st.write("Buy : " + str(buy))
     st.write("Sell : " + str(sell))
     stock_close = stock_bt.history(period = "5d", interval = "1d")
-    pnl = qty*stock_close.Close[-1] + net
+    pnl = qty*stock_close.Close[-2] + net
     pnl = round(pnl, 2)
     st.write('Final Pnl : ' + str(pnl))
 
