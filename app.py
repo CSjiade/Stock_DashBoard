@@ -65,7 +65,7 @@ def plot_price_volume_2(start, end, interval, data):
     stock_data.Date = convert_datetime(stock_data)
     st.write(stock_data)
 
-    fig = pt.figure(figsize=(20, 10))
+    fig = pt.figure(figsize=(8, 5))
     fast = stock_data.Close.rolling(window = int(mv_fast)).mean()
     slow = stock_data.Close.rolling(window = int (mv_slow)).mean()
     pt.plot(stock_data.Close, label='Close Price')
@@ -87,7 +87,7 @@ def plot_price_volume_3(start,interval,data):
     stock_data.Date = convert_datetime(stock_data)
     st.write(stock_data)
 
-    fig = pt.figure(figsize=(20, 10))
+    fig = pt.figure(figsize=(8, 5))
     fast = stock_data.Close.rolling(window = int(mv_fast)).mean()
     slow = stock_data.Close.rolling(window = int (mv_slow)).mean()
     pt.plot(stock_data.Close, label='Close Price')
@@ -301,7 +301,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
 
 def RSI_strategy(start, end, stock_bt,cerebro,initial_amt,size, ticker):
 
-    RSI_Entry =  st.sidebar.text_input("RSI Entry Number",30)
+    RSI_Entry = st.sidebar.text_input("RSI Entry Number",30)
     RSI_Exit = st.sidebar.text_input("RSI Exit Number",70)
     RSI_Period = st.sidebar.text_input("RSI Period", 14)
 
@@ -324,6 +324,135 @@ def RSI_strategy(start, end, stock_bt,cerebro,initial_amt,size, ticker):
     end_date = datetime.strptime(end,'%Y-%m-%d')
     data = bt.feeds.YahooFinanceData(dataname=ticker, fromdate = start_date, todate = end_date)
     back = cerebro_run(cerebro, data, RSIStrategy, initial_amt, size)
+    RSI_Visualisation(back,start,end,stock_bt,cerebro)
+
+
+
+
+def RSI_Visualisation(back,start,end,stock_bt,cerebro):
+    cashDelta_list = []
+    date_list = []
+    stock_qty = []
+    date_column = np.arange(np.datetime64(start), np.datetime64(end))
+    for key, value in back[0].analyzers.transaction.get_analysis().items():
+        str_date = str(key).split()
+        date_list.append(str_date[0])
+        cashDelta_list.append(value[0][4])
+        stock_qty.append(value[0][0])
+
+    cashDel = []
+    index_i = 0
+    stock_delta=[]
+
+    for date in date_column:
+        if str(date) in date_list:
+            stock_delta.append(stock_qty[index_i])
+            index_i +=1
+        else:
+            stock_delta.append(0)
+
+    index_w = 0
+    for date in date_column:
+        if str(date) in date_list:
+            cashDel.append(cashDelta_list[index_w])
+            index_w+=1
+        else:
+            cashDel.append(0)
+
+    Qty = [0+stock_delta[0]]
+    stock_delta.pop(0)
+    index_q=0
+    for delta in stock_delta:
+        Qty.append(Qty[index_q] + delta)
+        index_q+=1
+
+    pnl_list = [100000+cashDel[0]]
+
+    w = cashDel.pop(0)
+    index_x = 0
+    for cash in cashDel:
+        pnl_list.append(pnl_list[index_x] + cash)
+        index_x+=1
+    cashDel.insert(0,w)
+
+    data = {'date':date_column ,'cash_del': cashDel,'Stock_Quantity':Qty,'trade_pnl':pnl_list}
+    df =pd.DataFrame(data=data)
+    stock = stock_bt
+    stock_data = stock.history(start = start, end =end)
+    stock_data  = stock_data .reset_index()
+    data={'date':stock_data ['Date'],'close': stock_data ['Close']}
+    final_data =pd.DataFrame(data=data)
+    final_df = df.merge(final_data,"inner",'date')
+
+    final_df['final_pnl'] = final_df['Stock_Quantity'] * final_df['close'] + final_df['trade_pnl']
+    final_df = final_df.set_index('date')
+    fig = pt.figure(figsize=(10, 3))
+    st.write("PNL of BackTest")
+    pt.plot(final_df.final_pnl)
+    st.pyplot(fig)
+
+    pnl = cerebro.broker.getvalue()
+    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl)
+    sharpe = back[0].analyzers.sharpe.get_analysis()
+    sharpe_val = st.sidebar.text_input("Sharpe of Strategy","%.2f" %list(sharpe.values())[0])
+    returns = back[0].analyzers.returns.get_analysis()
+
+    transaction = back[0].analyzers.transaction.get_analysis()
+
+
+    date_column = []
+    for date in list(transaction.keys()):
+        date = datetime.strftime(date,"%Y-%m-%d")
+        date_column.append(date)
+
+    Price = []
+    Qty = []
+    Cash_change = []
+    buy = 0
+    sell = 0
+    net = 0
+    qty = 0
+    for transaction in list(transaction.values()):
+        Price.append(transaction[0][1])
+        Qty.append(transaction[0][0])
+        net += transaction[0][4]
+        qty += transaction[0][0]
+        Cash_change.append(transaction[0][4])
+        if int(transaction[0][0]) > 0:
+            buy+=1
+        else:
+            sell +=1;
+
+
+    transaction_data = {'date':date_column ,'Price': Price,'Quantity':Qty,'trade_pnl': Cash_change}
+    df_transaction = pd.DataFrame(data=transaction_data)
+    st.write('Trade Records')
+    st.write(df_transaction)
+
+    returns = list(returns.values())[0]
+    returns_pct = returns*100
+    returns_val = st.sidebar.text_input("Returns of Strategy %","%.2f" %returns_pct)
+    st.write("Buy : " + str(buy))
+    st.write("Sell : " + str(sell))
+    stock_close = stock_bt.history(period = "5d", interval = "1d")
+    pnl = qty*stock_close.Close[-1] + net
+    pnl = round(pnl, 2)
+    st.write('Final Pnl : ' + str(pnl))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def cerebro_run(cerebro,data,strategy,initial_amount,trade_size):
