@@ -248,8 +248,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
     pt.plot(final_df.final_pnl)
     st.pyplot(fig)
 
-    pnl = cerebro.broker.getvalue()
-    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl)
+
     sharpe = back[0].analyzers.sharpe.get_analysis()
     sharpe_val = st.sidebar.text_input("Sharpe of Strategy","%.2f" %list(sharpe.values())[0])
     returns = back[0].analyzers.returns.get_analysis()
@@ -295,6 +294,8 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
     pnl = qty*stock_close.Close[-1] + net
     pnl = round(pnl, 2)
     st.write('Final Pnl : ' + str(pnl))
+    pnl = cerebro.broker.getvalue()
+    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl)
 
 
 
