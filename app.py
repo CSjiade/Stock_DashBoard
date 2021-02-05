@@ -495,5 +495,7 @@ if __name__ == '__main__':
     stock_close = stock_bt.history(period = "5d", interval = "1d")
     current_price = st.sidebar.text_input( "Current Price" ,"%.2f" %stock_close.Close[-1])
     backtest_options = ['SMA','Simple RSI']
-    backtest_options= st.sidebar.selectbox(" ", backtest_options)
+    backtest_options= st.sidebar.selectbox("Strategies", backtest_options)
     backtest(backtest_options, stock_bt, ticker)
+
+
