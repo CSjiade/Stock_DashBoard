@@ -395,8 +395,7 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro):
     pt.plot(final_df.final_pnl)
     st.pyplot(fig)
 
-    pnl = cerebro.broker.getvalue()
-    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl)
+
     sharpe = back[0].analyzers.sharpe.get_analysis()
     sharpe_val = st.sidebar.text_input("Sharpe of Strategy","%.2f" %list(sharpe.values())[0])
     returns = back[0].analyzers.returns.get_analysis()
@@ -416,6 +415,7 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro):
     sell = 0
     net = 0
     qty = 0
+
     for transaction in list(transaction.values()):
         Price.append(transaction[0][1])
         Qty.append(transaction[0][0])
@@ -441,6 +441,9 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro):
     stock_close = stock_bt.history(period = "5d", interval = "1d")
     pnl = qty*stock_close.Close[-1] + net
     pnl = round(pnl, 2)
+    #pnl = cerebro.broker.getvalue()
+    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl)
+
     st.write('Final Pnl : ' + str(pnl))
 
 
