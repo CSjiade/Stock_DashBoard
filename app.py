@@ -148,7 +148,7 @@ def backtest(options,stock_bt,ticker):
         SMA_strategy(backtest_start, backtest_end,stock_bt,cerebro, intial_amount,trade_size,ticker,buy_n_hold)
 
     if(options == 'Simple RSI'):
-        RSI_strategy(backtest_start, backtest_end,stock_bt,cerebro, intial_amount,trade_size,ticker)
+        RSI_strategy(backtest_start, backtest_end,stock_bt,cerebro, intial_amount,trade_size,ticker,buy_n_hold)
 
 
 
@@ -299,25 +299,31 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
 
 
 
-def RSI_strategy(start, end, stock_bt,cerebro,initial_amt,size, ticker):
+def RSI_strategy(start, end, stock_bt,cerebro,initial_amt, size, ticker,buy_n_hold):
 
     RSI_Entry = st.sidebar.text_input("RSI Entry Number",30)
     RSI_Exit = st.sidebar.text_input("RSI Exit Number",70)
     RSI_Period = st.sidebar.text_input("RSI Period", 14)
+
+    a = []
+
 
     class RSIStrategy(bt.Strategy):
 
         def __init__(self):
             self.rsi = bt.indicators.RSI_SMA(self.data.close, period= int(RSI_Period))
 
-
         def next(self):
-            if not self.position:
-                if self.rsi < int(RSI_Entry):
-                    self.buy()
+
+            if self.rsi < int(RSI_Entry):
+                self.buy()
             else:
-                if self.rsi > int(RSI_Exit):
-                    self.sell()
+                if self.position:
+                    if self.rsi > int(RSI_Exit):
+                        if buy_n_hold == False:
+                            self.close()
+                    else:
+                        self.close(size=0)
     start = start
     end = end
     start_date = datetime.strptime(start,'%Y-%m-%d')
