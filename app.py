@@ -328,12 +328,12 @@ def RSI_strategy(start, end, stock_bt,cerebro,initial_amt, size, ticker,buy_n_ho
     end_date = datetime.strptime(end,'%Y-%m-%d')
     data = bt.feeds.YahooFinanceData(dataname=ticker, fromdate = start_date, todate = end_date)
     back = cerebro_run(cerebro, data, RSIStrategy, initial_amt, size)
-    RSI_Visualisation(back,start,end,stock_bt,cerebro)
+    RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt)
 
 
 
 
-def RSI_Visualisation(back,start,end,stock_bt,cerebro):
+def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
     cashDelta_list = []
     date_list = []
     stock_qty = []
@@ -441,8 +441,10 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro):
     stock_close = stock_bt.history(period = "5d", interval = "1d")
     pnl = qty*stock_close.Close[-1] + net
     pnl = round(pnl, 2)
+
     #pnl = cerebro.broker.getvalue()
-    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl)
+
+    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl) +initial_amt
 
     st.write('Final Pnl : ' + str(pnl))
 
