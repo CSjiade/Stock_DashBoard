@@ -181,7 +181,7 @@ def SMA_strategy(start, end, stock_bt,cerebro,initial_amt,size, ticker, buy_n_ho
     end = end
     start_date = datetime.strptime(start,'%Y-%m-%d')
     end_date = datetime.strptime(end,'%Y-%m-%d')
-    data = bt.feeds.YahooFinanceData(dataname=ticker,fromdate = start_date+timedelta(1), todate = end_date)
+    data = bt.feeds.YahooFinanceData(dataname=ticker,fromdate = start_date, todate = end_date+timedelta(1))
     back = cerebro_run(cerebro,data,Cross_MA,initial_amt, size)
     SMA_Visualisation(back,start,end,stock_bt,cerebro)
 
@@ -291,7 +291,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
     st.write("Buy : " + str(buy))
     st.write("Sell : " + str(sell))
     stock_close = stock_bt.history(period = "5d", interval = "1d")
-    pnl = qty*stock_close.Close[-2] + net
+    pnl = qty*stock_close.Close[-1] + net
     pnl = round(pnl, 2)
     st.write('Final Pnl : ' + str(pnl))
 
@@ -361,4 +361,3 @@ if __name__ == '__main__':
     backtest_options = ['SMA','Simple RSI']
     backtest_options= st.sidebar.selectbox(" ", backtest_options)
     backtest(backtest_options, stock_bt, ticker)
-
