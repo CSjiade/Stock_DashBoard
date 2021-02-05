@@ -285,9 +285,8 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
     st.write('Trade Records')
     st.write(df_transaction)
 
-    returns = list(returns.values())[0]
-    returns_pct = returns*100
-    returns_val = st.sidebar.text_input("Returns of Strategy %","%.2f" %returns_pct)
+
+
     st.write("Buy : " + str(buy))
     st.write("Sell : " + str(sell))
     stock_close = stock_bt.history(period = "5d", interval = "1d")
@@ -296,7 +295,8 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
     st.write('Final Pnl : ' + str(pnl))
     pnl = cerebro.broker.getvalue()
     pnl_val = st.sidebar.text_input("PNL of Strategy",pnl) + initial_amt
-
+    returns_pct = ((pnl/int(initial_amt))-1) * 100
+    returns_val = st.sidebar.text_input("Returns of Strategy %","%.2f" %returns_pct)
 
 
 
@@ -399,7 +399,6 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
 
     sharpe = back[0].analyzers.sharpe.get_analysis()
     sharpe_val = st.sidebar.text_input("Sharpe of Strategy","%.2f" %list(sharpe.values())[0])
-    returns = back[0].analyzers.returns.get_analysis()
 
     transaction = back[0].analyzers.transaction.get_analysis()
 
@@ -434,19 +433,18 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
     st.write('Trade Records')
     st.write(df_transaction)
 
-    returns = list(returns.values())[0]
-    returns_pct = returns*100
-    returns_val = st.sidebar.text_input("Returns of Strategy %","%.2f" %returns_pct)
+
     st.write("Buy : " + str(buy))
     st.write("Sell : " + str(sell))
     stock_close = stock_bt.history(period = "5d", interval = "1d")
     pnl = qty*stock_close.Close[-1] + net
     pnl = round(pnl, 2)
+
     #pnl = cerebro.broker.getvalue()
 
-
-
     pnl_val = st.sidebar.text_input("PNL of Strategy", str(int(pnl)+ int(initial_amt)))
+    returns_pct = ((int(pnl_val)/int(initial_amt))-1) * 100
+    returns_val = st.sidebar.text_input("Returns of Strategy %","%.2f" %returns_pct)
 
     st.write('Final Pnl : ' + str(pnl))
 
