@@ -284,6 +284,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
     transaction_data = {'date':date_column ,'Price': Price,'Quantity':Qty,'trade_pnl': Cash_change}
     df_transaction = pd.DataFrame(data=transaction_data)
     st.write('Trade Records')
+    st.write(df_transaction)
 
     returns = list(returns.values())[0]
     returns_pct = returns*100
