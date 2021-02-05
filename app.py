@@ -183,10 +183,10 @@ def SMA_strategy(start, end, stock_bt,cerebro,initial_amt,size, ticker, buy_n_ho
     end_date = datetime.strptime(end,'%Y-%m-%d')
     data = bt.feeds.YahooFinanceData(dataname=ticker,fromdate = start_date, todate = end_date+timedelta(1))
     back = cerebro_run(cerebro,data,Cross_MA,initial_amt, size)
-    SMA_Visualisation(back,start,end,stock_bt,cerebro)
+    SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt)
 
 
-def SMA_Visualisation(back,start,end,stock_bt,cerebro):
+def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
     cashDelta_list = []
     date_list = []
     stock_qty = []
@@ -295,7 +295,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro):
     pnl = round(pnl, 2)
     st.write('Final Pnl : ' + str(pnl))
     pnl = cerebro.broker.getvalue()
-    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl)
+    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl) + initial_amt
 
 
 
