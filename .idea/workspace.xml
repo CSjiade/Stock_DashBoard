@@ -13,8 +13,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="7380">
-              <caret line="492" column="48" selection-start-line="492" selection-start-column="48" selection-end-line="492" selection-end-column="48" />
+            <state relative-caret-position="344">
+              <caret line="499" lean-forward="true" selection-start-line="499" selection-end-line="499" />
               <folding>
                 <element signature="e#0#19#0" expanded="true" />
               </folding>
@@ -141,7 +141,7 @@
     <configuration />
   </component>
   <component name="ToolWindowManager">
-    <frame x="91" y="48" width="1349" height="809" extended-state="0" />
+    <frame x="91" y="48" width="1349" height="809" extended-state="1" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
@@ -179,8 +179,8 @@
     <entry file="file://$PROJECT_DIR$/Pipfile.lock" />
     <entry file="file://$PROJECT_DIR$/app.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="7380">
-          <caret line="492" column="48" selection-start-line="492" selection-start-column="48" selection-end-line="492" selection-end-column="48" />
+        <state relative-caret-position="344">
+          <caret line="499" lean-forward="true" selection-start-line="499" selection-end-line="499" />
           <folding>
             <element signature="e#0#19#0" expanded="true" />
           </folding>
