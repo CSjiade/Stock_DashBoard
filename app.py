@@ -442,10 +442,11 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
     stock_close = stock_bt.history(period = "5d", interval = "1d")
     pnl = qty*stock_close.Close[-1] + net
     pnl = round(pnl, 2)
-
     #pnl = cerebro.broker.getvalue()
 
-    pnl_val = st.sidebar.text_input("PNL of Strategy", pnl + initial_amt)
+
+
+    pnl_val = st.sidebar.text_input("PNL of Strategy", str(int(pnl)+ int(initial_amt)))
 
     st.write('Final Pnl : ' + str(pnl))
 
