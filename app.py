@@ -445,7 +445,7 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
 
     #pnl = cerebro.broker.getvalue()
 
-    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl) +initial_amt
+    pnl_val = st.sidebar.text_input("PNL of Strategy", pnl + initial_amt)
 
     st.write('Final Pnl : ' + str(pnl))
 
