@@ -15,6 +15,41 @@ from io import BytesIO
 
 
 
+def RSI_function(df,period):
+    period = int(period)
+    df['Up Move'] = np.nan
+    df['Down Move'] = np.nan
+    df['Average Up'] = np.nan
+    df['Average Down'] = np.nan
+    df['RS'] = np.nan
+    df['RSI'] = np.nan
+
+    for x in range(1, len(df)):
+
+        df['Up Move'][x] = 0
+        df['Down Move'][x] = 0
+
+        if df['Close'][x] > df['Close'][x-1]:
+            df['Up Move'][x] = df['Close'][x] - df['Close'][x-1]
+
+        if df['Close'][x] < df['Close'][x-1]:
+            df['Down Move'][x] = abs(df['Close'][x] - df['Close'][x-1])
+
+    df['Average Up'][period] = df['Up Move'][1:period].mean()
+    df['Average Down'][period] = df['Down Move'][1:period].mean()
+    df['RS'][period] = df['Average Up'][period] / df['Average Down'][period]
+    df['RSI'][period] = 100 - (100/(1+df['RS'][period]))
+
+## Calculate rest of Average Up, Average Down, RS, RSI
+    for x in range(period+1, len(df)):
+        df['Average Up'][x] = (df['Average Up'][x-1]*(period-1)+df['Up Move'][x])/period
+        df['Average Down'][x] = (df['Average Down'][x-1]*(period-1)+df['Down Move'][x])/period
+        df['RS'][x] = df['Average Up'][x] / df['Average Down'][x]
+        df['RSI'][x] = 100 - (100/(1+df['RS'][x]))
+
+    df = df.drop(columns=['Up Move', 'Down Move','Average Up','Average Down','RS'])
+    return df
+
 # function to your download dataframes to a csv file
 def download_link(object_to_download, download_filename, download_link_text):
 
@@ -38,32 +73,51 @@ def convert_datetime(stock_data):
     return dates
 
 
-def plot_price_volume(period,interval,data):
+def plot_price_volume(period,interval,data,rsi_period):
     stock_data = data.history(period = period, interval = interval)
     st.write('Close Price')
     st.line_chart(stock_data.Close)
     st.markdown('Volume')
     st.line_chart(stock_data.Volume)
 
-    st.write("Stock Data")
     stock_data = stock_data.reset_index()
     stock_data.Date = convert_datetime(stock_data)
-    st.write(stock_data)
+    stock_data = RSI_function(stock_data,rsi_period)
 
     download_interface(stock_data,stock_ticker)
 
+    st.write("RSI Data")
+    st.line_chart(stock_data.RSI)
 
-def plot_price_volume_2(start, end, interval, data):
+    st.markdown('Volume')
+    st.line_chart(stock_data.Volume)
+
+    stock_data = stock_data.reset_index()
+    stock_data.Date = convert_datetime(stock_data)
+    st.write("Stock Data")
+    st.write(stock_data)
+
+
+
+
+def plot_price_volume_2(start, end, interval, data,rsi_period):
     stock_data = data.history(start = start, end = end, interval = interval)
     st.write('Close Price')
     st.line_chart(stock_data.Close)
+
+
+    stock_data = RSI_function(stock_data,rsi_period)
+    st.write("RSI Data")
+    st.line_chart(stock_data.RSI)
+
     st.markdown('Volume')
     st.line_chart(stock_data.Volume)
 
-    st.write("Stock Data")
     stock_data = stock_data.reset_index()
     stock_data.Date = convert_datetime(stock_data)
+    st.write("Stock Data")
     st.write(stock_data)
+    download_interface(stock_data,stock_ticker)
 
     fig = pt.figure(figsize=(8, 5))
     fast = stock_data.Close.rolling(window = int(mv_fast)).mean()
@@ -72,20 +126,28 @@ def plot_price_volume_2(start, end, interval, data):
     pt.plot(fast,label = 'mvag ' + mv_fast + ' days')
     pt.plot(slow, label ='mvag ' + mv_slow + ' days')
     pt.legend()
+    st.write("Moving Averages")
     st.pyplot(fig)
-    download_interface(stock_data,stock_ticker)
 
-def plot_price_volume_3(start,interval,data):
+
+def plot_price_volume_3(start,interval,data,rsi_period):
     stock_data = data.history(start = start, interval = interval)
     st.write('Close Price')
     st.line_chart(stock_data.Close)
+
+    stock_data = RSI_function(stock_data,rsi_period)
+    st.write("RSI Data")
+    st.line_chart(stock_data.RSI)
+
     st.markdown('Volume')
     st.line_chart(stock_data.Volume)
 
-    st.write("Stock Data")
     stock_data = stock_data.reset_index()
     stock_data.Date = convert_datetime(stock_data)
+    st.write("Stock Data")
     st.write(stock_data)
+
+    download_interface(stock_data,stock_ticker)
 
     fig = pt.figure(figsize=(8, 5))
     fast = stock_data.Close.rolling(window = int(mv_fast)).mean()
@@ -95,19 +157,22 @@ def plot_price_volume_3(start,interval,data):
     pt.plot(slow, label ='mvag ' + mv_slow + ' days')
     pt.legend()
     st.pyplot(fig)
-    download_interface(stock_data,stock_ticker)
 
 
-def display_date(data,start,end):
+
+def display_date(data,start,end,rsi_period):
     interval_options = ['1d', '5d', '1wk', '1mo', '3mo']
     interval = st.sidebar.selectbox("interval", interval_options)
     if(end == ''):
-        plot_price_volume_3(start,interval,data)
+        plot_price_volume_3(start,interval,data,rsi_period)
     else:
-        plot_price_volume_2(start,end,interval,data)
+        plot_price_volume_2(start,end,interval,data,rsi_period)
 
 
-def display_period(period_view,data):
+
+
+
+def display_period(period_view,data,rsi_period):
 
     if(period_view==True):
         period_options = ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y','ytd', 'max','']
@@ -116,28 +181,40 @@ def display_period(period_view,data):
         if (period == '1d' or period == '5d'):
             interval_options = ['1d','1m','5m', '30m', '1h']
             interval = st.sidebar.selectbox("interval", interval_options)
-            plot_price_volume(period,interval,data)
+            plot_price_volume(period,interval,data,rsi_period)
 
         elif period == '1mo':
             interval_options = ['1d','5d','1wk','30m','1h']
             interval = st.sidebar.selectbox("interval", interval_options)
-            plot_price_volume(period,interval,data)
+            plot_price_volume(period,interval,data,rsi_period)
 
 
         elif (period == '3mo' or '6mo' or '1y' or 'ytd' or '2y' or '5y' or '10y' or 'max'):
             interval_options = ['1d', '5d', '1wk', '1mo', '3mo']
             interval = st.sidebar.selectbox("interval", interval_options)
-            plot_price_volume(period,interval,data)
+            plot_price_volume(period,interval,data,rsi_period)
 
     elif (period_view==False):
         start = st.sidebar.text_input("start", datetime.strftime(datetime.today()-timedelta(365),"%Y-%m-%d"))
         end = st.sidebar.text_input("end", datetime.strftime(datetime.today(),"%Y-%m-%d"))
-        display_date(data,start,end)
+        display_date(data,start,end,rsi_period)
 
 
 
-def backtest(options,stock_bt,ticker):
+
+def backtest(options,stock_bt,ticker,execution_type,sell_execution_type):
     cerebro = bt.Cerebro()
+
+
+    sell_percentage = 0
+
+    if sell_execution_type == "Customise Sell":
+        sell_options = ["Current Day Close Price","Next Day Open Price"]
+        sell_execution_type = st.sidebar.selectbox("Sell Execution Type", sell_options)
+        sell_percentage = st.sidebar.text_input("Sell Percentage %",50)
+        sell_percentage = float(sell_percentage)/100
+
+    RSI_Period = st.sidebar.text_input("RSI Period", 14)
     backtest_start = st.sidebar.text_input("Start Period",datetime.strftime(datetime.today()-timedelta(365),"%Y-%m-%d"))
     backtest_end  = st.sidebar.text_input("End Period",datetime.strftime(datetime.today(),"%Y-%m-%d"))
     buy_n_hold  = st.sidebar.checkbox("Buy and Hold")
@@ -145,35 +222,58 @@ def backtest(options,stock_bt,ticker):
     intial_amount = st.sidebar.text_input("Initial Cash",100000)
 
     if (options=='SMA'):
-        SMA_strategy(backtest_start, backtest_end,stock_bt,cerebro, intial_amount,trade_size,ticker,buy_n_hold)
+        SMA_strategy(backtest_start, backtest_end,stock_bt,cerebro, intial_amount,trade_size,ticker,buy_n_hold,RSI_Period,execution_type,sell_execution_type,sell_percentage)
 
     if(options == 'Simple RSI'):
-        RSI_strategy(backtest_start, backtest_end,stock_bt,cerebro, intial_amount,trade_size,ticker,buy_n_hold)
+        RSI_strategy(backtest_start, backtest_end,stock_bt,cerebro, intial_amount,trade_size,ticker,buy_n_hold,RSI_Period,execution_type,sell_execution_type,sell_percentage)
 
 
+#execution = ["Day Close", "Next Day Open"]
 
 
 
 ############# Strategies  ######################
-def SMA_strategy(start, end, stock_bt,cerebro,initial_amt,size, ticker, buy_n_hold):
+def SMA_strategy(start, end, stock_bt,cerebro,initial_amt,trade_size, ticker, buy_n_hold,RSI_Period,execution_type,sell_execution_type, sell_percentage,):
     cross_over_fast =  st.sidebar.text_input("Average Cross Over Days",5)
     cross_over_slow = st.sidebar.text_input("Average Days",10)
 
     class Cross_MA(bt.Strategy):
+
         def __init__(self):
             slow = bt.ind.SMA(period = int(cross_over_slow))
             fast = bt.ind.SMA(period = int(cross_over_fast))
-            self.crossver=bt.ind.CrossOver(fast,slow)
+            self.crossver = bt.ind.CrossOver(fast,slow)
+            self.curr =0
 
         def next(self):
-
             if self.crossver>0:
-                self.buy()
+                if execution_type == "Current Day Close Price":
+                    self.buy(exectype=bt.Order.Close)
+                    self.curr += int(trade_size)
+                else:
+                    self.buy(exectype=bt.Order.Market)
+                    self.curr += int(trade_size)
 
             if self.position:
                 if self.crossver <0:
                     if buy_n_hold == False:
-                        self.close()
+                        if sell_execution_type == "Sell All at Next Open":
+                            self.close()
+                        if sell_execution_type == "Current Day Close Price":
+                            if self.curr <= 10:
+                                sell_size = self.curr
+                            else:
+                                sell_size = self.curr * float(sell_percentage)
+                            self.sell(exectype = bt.Order.Close, size=int(sell_size))
+                            self.curr += -int(sell_size)
+
+                        if sell_execution_type == "Next Day Open Price":
+                            if self.curr <= 10:
+                                sell_size = self.curr
+                            else:
+                                sell_size = self.curr * float(sell_percentage)
+                            self.sell(exectype = bt.Order.Market, size=int(sell_size))
+                            self.curr += -int(sell_size)
                     else:
                         self.sell(size=0)
 
@@ -182,11 +282,11 @@ def SMA_strategy(start, end, stock_bt,cerebro,initial_amt,size, ticker, buy_n_ho
     start_date = datetime.strptime(start,'%Y-%m-%d')
     end_date = datetime.strptime(end,'%Y-%m-%d')
     data = bt.feeds.YahooFinanceData(dataname=ticker,fromdate = start_date, todate = end_date+timedelta(1))
-    back = cerebro_run(cerebro,data,Cross_MA,initial_amt, size)
-    SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt)
+    back = cerebro_run(cerebro,data,Cross_MA,initial_amt, trade_size)
+    SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period)
 
 
-def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
+def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period):
     cashDelta_list = []
     date_list = []
     stock_qty = []
@@ -243,7 +343,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
 
     final_df['final_pnl'] = final_df['Stock_Quantity'] * final_df['close'] + final_df['trade_pnl']
     final_df = final_df.set_index('date')
-    fig = pt.figure(figsize=(10, 3))
+    fig = pt.figure(figsize=(8, 5))
     st.write("PNL of BackTest")
     pt.plot(final_df.final_pnl)
     st.pyplot(fig)
@@ -280,12 +380,40 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
             sell +=1;
 
 
-    transaction_data = {'date':date_column ,'Price': Price,'Quantity':Qty,'trade_pnl': Cash_change}
+    transaction_data = {'Date':date_column ,'Price': Price,'Quantity':Qty,'trade_pnl': Cash_change}
     df_transaction = pd.DataFrame(data=transaction_data)
+
+
+
+    RSI_df = RSI_function(stock_data,RSI_Period)
+
+    RSI_df = pd.DataFrame(RSI_df)
+
+    date_column = []
+    RSI_column = []
+    for date in RSI_df['Date']:
+        date = datetime.strftime(date,"%Y-%m-%d")
+        date_column.append(date)
+
+    for rsi in RSI_df['RSI']:
+        if str(rsi) != "nan":
+            RSI_column.append(int(rsi))
+        else:
+             RSI_column.append(rsi)
+
+    RSI_df['Date'] = date_column
+    RSI_df['RSI'] = RSI_column
+
+
+    df_transaction = pd.DataFrame(data=transaction_data)
+
+    df_transaction = df_transaction.merge(RSI_df, left_on='Date', right_on='Date')
+
+
+    df_transaction = df_transaction[['Date','Price','Quantity','trade_pnl','Open','High','Low','Close','Volume','RSI']]
+
     st.write('Trade Records')
     st.write(df_transaction)
-
-
 
     st.write("Buy : " + str(buy))
     st.write("Sell : " + str(sell))
@@ -294,47 +422,70 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
     pnl = round(pnl, 2)
     st.write('Final Pnl : ' + str(pnl))
     pnl = cerebro.broker.getvalue()
-    pnl_val = st.sidebar.text_input("PNL of Strategy",pnl) + initial_amt
+    pnl_val = st.sidebar.text_input("PNL of Strategy",round(pnl,2))
     returns_pct = ((pnl/int(initial_amt))-1) * 100
     returns_val = st.sidebar.text_input("Returns of Strategy %","%.2f" %returns_pct)
 
 
 
-def RSI_strategy(start, end, stock_bt,cerebro,initial_amt, size, ticker,buy_n_hold):
+
+
+def RSI_strategy(start, end, stock_bt,cerebro,initial_amt, trade_size, ticker,buy_n_hold,RSI_Period,execution_type,sell_execution_type,sell_percentage):
 
     RSI_Entry = st.sidebar.text_input("RSI Entry Number",30)
     RSI_Exit = st.sidebar.text_input("RSI Exit Number",70)
-    RSI_Period = st.sidebar.text_input("RSI Period", 14)
 
 
     class RSIStrategy(bt.Strategy):
 
         def __init__(self):
             self.rsi = bt.indicators.RSI_SMA(self.data.close, period= int(RSI_Period))
+            self.curr =0
 
         def next(self):
 
             if self.rsi < int(RSI_Entry):
-                self.buy()
+                if execution_type == "Current Day Close Price":
+                    self.buy(exectype=bt.Order.Close)
+                    self.curr += int(trade_size)
+                else:
+                    self.buy(exectype=bt.Order.Market)
+                    self.curr += int(trade_size)
             else:
                 if self.position:
                     if self.rsi > int(RSI_Exit):
                         if buy_n_hold == False:
-                            self.close()
-                    else:
-                        self.close(size=0)
+                            if sell_execution_type == "Sell All at Next Open":
+                                 self.close()
+                            if sell_execution_type == "Current Day Close Price":
+                                if self.curr <= 10:
+                                    sell_size = self.curr
+                                else:
+                                    sell_size = self.curr * float(sell_percentage)
+                                self.sell(exectype = bt.Order.Close, size=int(sell_size))
+                                self.curr += -int(sell_size)
+                            if sell_execution_type == "Next Day Open Price":
+
+                                if self.curr <= 10:
+                                    sell_size = self.curr
+                                else:
+                                    sell_size = self.curr * float(sell_percentage)
+                                self.sell(exectype = bt.Order.Market, size=int(sell_size))
+                                self.curr += -int(sell_size)
+                        else:
+                            self.sell(size=0)
     start = start
     end = end
     start_date = datetime.strptime(start,'%Y-%m-%d')
     end_date = datetime.strptime(end,'%Y-%m-%d')
     data = bt.feeds.YahooFinanceData(dataname=ticker, fromdate = start_date, todate = end_date)
-    back = cerebro_run(cerebro, data, RSIStrategy, initial_amt, size)
-    RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt)
+    back = cerebro_run(cerebro, data, RSIStrategy, initial_amt, trade_size)
+    RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period)
 
 
 
 
-def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
+def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period):
     cashDelta_list = []
     date_list = []
     stock_qty = []
@@ -384,14 +535,18 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
     df =pd.DataFrame(data=data)
     stock = stock_bt
     stock_data = stock.history(start = start, end =end)
-    stock_data  = stock_data .reset_index()
+    stock_data = stock_data.reset_index()
+
+
+
     data={'date':stock_data ['Date'],'close': stock_data ['Close']}
+
     final_data =pd.DataFrame(data=data)
     final_df = df.merge(final_data,"inner",'date')
 
     final_df['final_pnl'] = final_df['Stock_Quantity'] * final_df['close'] + final_df['trade_pnl']
     final_df = final_df.set_index('date')
-    fig = pt.figure(figsize=(10, 3))
+    fig = pt.figure(figsize=(8, 5))
     st.write("PNL of BackTest")
     pt.plot(final_df.final_pnl)
     st.pyplot(fig)
@@ -399,6 +554,7 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
 
     sharpe = back[0].analyzers.sharpe.get_analysis()
     sharpe_val = st.sidebar.text_input("Sharpe of Strategy","%.2f" %list(sharpe.values())[0])
+
 
     transaction = back[0].analyzers.transaction.get_analysis()
 
@@ -428,11 +584,39 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
             sell +=1;
 
 
-    transaction_data = {'date':date_column ,'Price': Price,'Quantity':Qty,'trade_pnl': Cash_change}
-    df_transaction = pd.DataFrame(data=transaction_data)
-    st.write('Trade Records')
-    st.write(df_transaction)
+    transaction_data = {'Date':date_column ,'Price': Price,'Quantity':Qty,'trade_pnl': Cash_change}
 
+
+    RSI_df = RSI_function(stock_data,RSI_Period)
+
+    RSI_df_Graph = stock_data.set_index('Date')
+
+    RSI_df = pd.DataFrame(RSI_df)
+
+
+    date_column = []
+    RSI_column = []
+    for date in RSI_df['Date']:
+        date = datetime.strftime(date,"%Y-%m-%d")
+        date_column.append(date)
+
+    for rsi in RSI_df['RSI']:
+        if str(rsi) != "nan":
+            RSI_column.append(int(rsi))
+        else:
+             RSI_column.append(rsi)
+
+    RSI_df['Date'] = date_column
+    RSI_df['RSI'] = RSI_column
+    RSI_df['RSI'] = RSI_df['RSI'].shift(1)
+
+    df_transaction = pd.DataFrame(data=transaction_data)
+
+    df_transaction = df_transaction.merge(RSI_df, left_on='Date', right_on='Date')
+
+    st.write('Trade Records')
+    df_transaction = df_transaction[['Date','Price','Quantity','trade_pnl','RSI','Open','High','Low','Close','Volume']]
+    st.write(df_transaction)
 
     st.write("Buy : " + str(buy))
     st.write("Sell : " + str(sell))
@@ -445,12 +629,11 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt):
     pnl_val = st.sidebar.text_input("PNL of Strategy", str(int(pnl)+ int(initial_amt)))
     returns_pct = ((int(pnl_val)/int(initial_amt))-1) * 100
     returns_val = st.sidebar.text_input("Returns of Strategy %","%.2f" %returns_pct)
-
     st.write('Final Pnl : ' + str(pnl))
 
 
-
-
+    st.write("RSI Graph")
+    st.line_chart(RSI_df_Graph.RSI)
 
 
 
@@ -488,9 +671,10 @@ if __name__ == '__main__':
     stock_ticker = st.sidebar.text_input("Stock Ticker", "AWX.SI")
     stock = yf.Ticker(stock_ticker)
     period_view = st.sidebar.checkbox('period')
-    mv_slow = st.sidebar.text_input("Slow",5)
-    mv_fast = st.sidebar.text_input("Fast",25)
-    display_period(period_view,stock)
+    mv_slow = st.sidebar.text_input("Moving Average (Slow)",5)
+    mv_fast = st.sidebar.text_input("Moving Average (Fast)",25)
+    rsi_period = st.sidebar.text_input("RSI (Period)",14)
+    display_period(period_view,stock,rsi_period)
 
     st.sidebar.header('Backtest Strategy')
     ticker = st.sidebar.text_input("Ticker","AWX.SI")
@@ -498,5 +682,10 @@ if __name__ == '__main__':
     stock_close = stock_bt.history(period = "5d", interval = "1d")
     current_price = st.sidebar.text_input( "Current Price" ,"%.2f" %stock_close.Close[-1])
     backtest_options = ['SMA','Simple RSI']
-    backtest_options= st.sidebar.selectbox("Strategies", backtest_options)
-    backtest(backtest_options, stock_bt, ticker)
+    backtest_options = st.sidebar.selectbox("Strategies", backtest_options)
+    buy_execution = ["Current Day Close Price", "Next Day Open Price"]
+    sell_execution = ["Sell All at Next Open", "Customise Sell"]
+    buy_execution_type = st.sidebar.selectbox("Buy Execution Type", buy_execution)
+    sell_execution_type = st.sidebar.selectbox("Sell Execution Type", sell_execution)
+    st.title("BackTest")
+    backtest(backtest_options, stock_bt, ticker,buy_execution_type,sell_execution_type)
