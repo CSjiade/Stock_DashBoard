@@ -219,13 +219,13 @@ def backtest(options,stock_bt,ticker,execution_type,sell_execution_type):
     backtest_end  = st.sidebar.text_input("End Period",datetime.strftime(datetime.today(),"%Y-%m-%d"))
     buy_n_hold  = st.sidebar.checkbox("Buy and Hold")
     trade_size = st.sidebar.text_input("Lot Size for 1 transaction",5000)
-    intial_amount = st.sidebar.text_input("Initial Cash",100000)
+    initial_amount = st.sidebar.text_input("Initial Cash",100000)
 
     if (options=='SMA'):
-        SMA_strategy(backtest_start, backtest_end,stock_bt,cerebro, intial_amount,trade_size,ticker,buy_n_hold,RSI_Period,execution_type,sell_execution_type,sell_percentage)
+        SMA_strategy(backtest_start, backtest_end,stock_bt,cerebro, initial_amount,trade_size,ticker,buy_n_hold,RSI_Period,execution_type,sell_execution_type,sell_percentage)
 
     if(options == 'Simple RSI'):
-        RSI_strategy(backtest_start, backtest_end,stock_bt,cerebro, intial_amount,trade_size,ticker,buy_n_hold,RSI_Period,execution_type,sell_execution_type,sell_percentage)
+        RSI_strategy(backtest_start, backtest_end,stock_bt,cerebro, initial_amount,trade_size,ticker,buy_n_hold,RSI_Period,execution_type,sell_execution_type,sell_percentage)
 
 
 #execution = ["Day Close", "Next Day Open"]
@@ -323,7 +323,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period):
         Qty.append(Qty[index_q] + delta)
         index_q+=1
 
-    pnl_list = [100000+cashDel[0]]
+    pnl_list = [int(initial_amt)+cashDel[0]]
 
     w = cashDel.pop(0)
     index_x = 0
@@ -522,7 +522,7 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period):
         Qty.append(Qty[index_q] + delta)
         index_q+=1
 
-    pnl_list = [100000+cashDel[0]]
+    pnl_list = [int(initial_amt)+cashDel[0]]
 
     w = cashDel.pop(0)
     index_x = 0
@@ -683,9 +683,9 @@ if __name__ == '__main__':
     current_price = st.sidebar.text_input( "Current Price" ,"%.2f" %stock_close.Close[-1])
     backtest_options = ['SMA','Simple RSI']
     backtest_options = st.sidebar.selectbox("Strategies", backtest_options)
-    buy_execution = ["Current Day Close Price", "Next Day Open Price"]
+    execution = ["Current Day Close Price", "Next Day Open Price"]
     sell_execution = ["Sell All at Next Open", "Customise Sell"]
-    buy_execution_type = st.sidebar.selectbox("Buy Execution Type", buy_execution)
-    sell_execution_type = st.sidebar.selectbox("Sell Execution Type", sell_execution)
+    execution_type = st.sidebar.selectbox("Buy Execution Type",execution)
+    sell_execution_type = st.sidebar.selectbox("Sell Execution Type",sell_execution)
     st.title("BackTest")
-    backtest(backtest_options, stock_bt, ticker,buy_execution_type,sell_execution_type)
+    backtest(backtest_options, stock_bt, ticker,execution_type,sell_execution_type)
