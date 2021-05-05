@@ -14,7 +14,6 @@ from io import BytesIO
 
 
 
-
 def RSI_function(df,period):
     period = int(period)
     df['Up Move'] = np.nan
@@ -50,7 +49,7 @@ def RSI_function(df,period):
     df = df.drop(columns=['Up Move', 'Down Move','Average Up','Average Down','RS'])
     return df
 
-# function to your download dataframes to a csv file
+# Function to your download dataframes to a csv file
 def download_link(object_to_download, download_filename, download_link_text):
 
     if isinstance(object_to_download,pd.DataFrame):
