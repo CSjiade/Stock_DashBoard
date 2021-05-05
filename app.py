@@ -4,7 +4,7 @@ import streamlit as st
 import yfinance as yf
 import backtrader as bt
 import backtrader.analyzers as btanalysis
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import matplotlib.pyplot as pt
 import base64
 from PIL import Image
@@ -68,32 +68,40 @@ def download_interface(stock_data,stock_ticker):
 def convert_datetime(stock_data):
     dates = []
     for date in stock_data.Date:
-        dt = date.strftime("%Y-%m-%d")
+        date_obj = date.to_pydatetime()
+        dt = date_obj.strftime("%Y-%m-%d")
         dates.append(dt)
     return dates
 
 
 def plot_price_volume(period,interval,data,rsi_period):
     stock_data = data.history(period = period, interval = interval)
+
     st.write('Close Price')
     st.line_chart(stock_data.Close)
+
     st.markdown('Volume')
     st.line_chart(stock_data.Volume)
 
-    stock_data = stock_data.reset_index()
-    stock_data.Date = convert_datetime(stock_data)
+
     stock_data = RSI_function(stock_data,rsi_period)
-
-    download_interface(stock_data,stock_ticker)
-
     st.write("RSI Data")
     st.line_chart(stock_data.RSI)
 
-    st.markdown('Volume')
-    st.line_chart(stock_data.Volume)
+    fig = pt.figure(figsize=(8, 5))
+    fast = stock_data.Close.rolling(window = int(mv_fast)).mean()
+    slow = stock_data.Close.rolling(window = int (mv_slow)).mean()
+
+    pt.plot(stock_data.Close, label='Close Price')
+    pt.plot(fast,label = 'mvag ' + mv_fast + ' days')
+    pt.plot(slow, label ='mvag ' + mv_slow + ' days')
+    pt.legend()
+    st.write("Moving Averages")
+    st.pyplot(fig)
 
     stock_data = stock_data.reset_index()
     stock_data.Date = convert_datetime(stock_data)
+    download_interface(stock_data,stock_ticker)
     st.write("Stock Data")
     st.write(stock_data)
 
@@ -102,22 +110,18 @@ def plot_price_volume(period,interval,data,rsi_period):
 
 def plot_price_volume_2(start, end, interval, data,rsi_period):
     stock_data = data.history(start = start, end = end, interval = interval)
+
     st.write('Close Price')
     st.line_chart(stock_data.Close)
 
+
+    st.markdown('Volume')
+    st.line_chart(stock_data.Volume)
 
     stock_data = RSI_function(stock_data,rsi_period)
     st.write("RSI Data")
     st.line_chart(stock_data.RSI)
 
-    st.markdown('Volume')
-    st.line_chart(stock_data.Volume)
-
-    stock_data = stock_data.reset_index()
-    stock_data.Date = convert_datetime(stock_data)
-    st.write("Stock Data")
-    st.write(stock_data)
-    download_interface(stock_data,stock_ticker)
 
     fig = pt.figure(figsize=(8, 5))
     fast = stock_data.Close.rolling(window = int(mv_fast)).mean()
@@ -130,24 +134,27 @@ def plot_price_volume_2(start, end, interval, data,rsi_period):
     st.pyplot(fig)
 
 
+    stock_data = stock_data.reset_index()
+    stock_data.Date = convert_datetime(stock_data)
+    st.write("Stock Data")
+    st.write(stock_data)
+    download_interface(stock_data,stock_ticker)
+
+
+
 def plot_price_volume_3(start,interval,data,rsi_period):
     stock_data = data.history(start = start, interval = interval)
+
     st.write('Close Price')
     st.line_chart(stock_data.Close)
+
+    st.markdown('Volume')
+    st.line_chart(stock_data.Volume)
 
     stock_data = RSI_function(stock_data,rsi_period)
     st.write("RSI Data")
     st.line_chart(stock_data.RSI)
 
-    st.markdown('Volume')
-    st.line_chart(stock_data.Volume)
-
-    stock_data = stock_data.reset_index()
-    stock_data.Date = convert_datetime(stock_data)
-    st.write("Stock Data")
-    st.write(stock_data)
-
-    download_interface(stock_data,stock_ticker)
 
     fig = pt.figure(figsize=(8, 5))
     fast = stock_data.Close.rolling(window = int(mv_fast)).mean()
@@ -159,9 +166,16 @@ def plot_price_volume_3(start,interval,data,rsi_period):
     st.pyplot(fig)
 
 
+    stock_data = stock_data.reset_index()
+    stock_data.Date = convert_datetime(stock_data)
+    st.write("Stock Data")
+    st.write(stock_data)
+    download_interface(stock_data,stock_ticker)
+
+
 
 def display_date(data,start,end,rsi_period):
-    interval_options = ['1d', '5d', '1wk', '1mo', '3mo']
+    interval_options = ['1d', '5d', '1wk', '1mo']
     interval = st.sidebar.selectbox("interval", interval_options)
     if(end == ''):
         plot_price_volume_3(start,interval,data,rsi_period)
@@ -175,21 +189,10 @@ def display_date(data,start,end,rsi_period):
 def display_period(period_view,data,rsi_period):
 
     if(period_view==True):
-        period_options = ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y','ytd', 'max','']
+        period_options = ['1y', '3mo', '6mo','ytd','2y', '5y', '10y', 'max']
         period = st.sidebar.selectbox("period", period_options)
 
-        if (period == '1d' or period == '5d'):
-            interval_options = ['1d','1m','5m', '30m', '1h']
-            interval = st.sidebar.selectbox("interval", interval_options)
-            plot_price_volume(period,interval,data,rsi_period)
-
-        elif period == '1mo':
-            interval_options = ['1d','5d','1wk','30m','1h']
-            interval = st.sidebar.selectbox("interval", interval_options)
-            plot_price_volume(period,interval,data,rsi_period)
-
-
-        elif (period == '3mo' or '6mo' or '1y' or 'ytd' or '2y' or '5y' or '10y' or 'max'):
+        if (period == '3mo' or '6mo' or '1y' or 'ytd' or '2y' or '5y' or '10y' or 'max'):
             interval_options = ['1d', '5d', '1wk', '1mo', '3mo']
             interval = st.sidebar.selectbox("interval", interval_options)
             plot_price_volume(period,interval,data,rsi_period)
@@ -218,7 +221,7 @@ def backtest(options,stock_bt,ticker,execution_type,sell_execution_type):
     backtest_start = st.sidebar.text_input("Start Period",datetime.strftime(datetime.today()-timedelta(365),"%Y-%m-%d"))
     backtest_end  = st.sidebar.text_input("End Period",datetime.strftime(datetime.today(),"%Y-%m-%d"))
     buy_n_hold  = st.sidebar.checkbox("Buy and Hold")
-    trade_size = st.sidebar.text_input("Lot Size for 1 transaction",5000)
+    trade_size = st.sidebar.text_input("Lot Size for 1 transaction", 400)
     initial_amount = st.sidebar.text_input("Initial Cash",100000)
 
     if (options=='SMA'):
@@ -668,7 +671,7 @@ if __name__ == '__main__':
     img = Image.open(BytesIO(response. content))
     st.image(img, use_column_width=True)
     st.sidebar.header('Enter your Inputs')
-    stock_ticker = st.sidebar.text_input("Stock Ticker", "AWX.SI")
+    stock_ticker = st.sidebar.text_input("Stock Ticker", "TSM")
     stock = yf.Ticker(stock_ticker)
     period_view = st.sidebar.checkbox('period')
     mv_slow = st.sidebar.text_input("Moving Average (Slow)",5)
@@ -677,7 +680,7 @@ if __name__ == '__main__':
     display_period(period_view,stock,rsi_period)
 
     st.sidebar.header('Backtest Strategy')
-    ticker = st.sidebar.text_input("Ticker","AWX.SI")
+    ticker = st.sidebar.text_input("Ticker","TSM")
     stock_bt = yf.Ticker(ticker)
     stock_close = stock_bt.history(period = "5d", interval = "1d")
     current_price = st.sidebar.text_input( "Current Price" ,"%.2f" %stock_close.Close[-1])
