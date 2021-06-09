@@ -1,9 +1,11 @@
 # Stock_Web
-A simple stock web app for backtesting PNL of RSI and Moving Average trading strategies. Just enter your stock ticker.
-
+A simple stock web app for having an overview of a stock and backtesting of RSI and Moving Average trading strategies. 
 https://stockapp-streamlit.herokuapp.com/
 
 
 **Reminder:**
 
-This a just a prototype. Hence, ensure your stock ticker and inputs are valid, as there is no error handling logic built into the app yet.
+This a just a prototype. Hence, ensure stock ticker and other inputs are valid, as exception and error handling is not very comprehensive.
+Also this app uses Yahoo Finance API. Hence, certain stocks in the APAC including Japan region will have missing financial information.
+US stocks have minimal issues with mising data. 
+
