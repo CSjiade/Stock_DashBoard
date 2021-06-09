@@ -729,13 +729,16 @@ def FinanceStatement_Setup(stock_ticker):
             ebit_margin.append(ebit_margin_data)
 
         int_exp_data = data[0][1]['interestExpense']
-        if int_exp_data is None:
+        if int_exp_data is None or int_exp_data==0:
             int_exp_data = np.nan
             int_exp.append(int_exp_data)
             int_coverage.append(int_exp_data)
         else:
             int_exp.append(int_exp_data/million)
-            int_coverage.append(data[0][1]['ebit']/int_exp_data)
+            if ebit_data < 0:
+                int_coverage.append(np.nan)
+            else:
+                int_coverage.append(data[0][1]['ebit']/int_exp_data)
 
         income_data = data[0][1]['netIncome']
         if income_data is None or income_data==0:
@@ -830,7 +833,6 @@ def FinanceStatement_Setup(stock_ticker):
           'D&A': np.multiply(da,-1),'EBIT': ebit, 'Interest Exp': int_exp,
           'Profit': income
     }
-    print(df_income)
 
     df_income = pd.DataFrame(data=df_income,index=index)
 
@@ -841,7 +843,6 @@ def FinanceStatement_Setup(stock_ticker):
                  'Profit Margin (%)': income_margin
     }
 
-    print(df_ratios)
     df_ratios = pd.DataFrame(data=df_ratios,index=index)
 
     df_cash = pd.DataFrame(data=df_cash,index=index)
@@ -888,14 +889,14 @@ if __name__ == '__main__':
     mv_fast = st.sidebar.text_input("Moving Average (Fast)",25)
     rsi_period = st.sidebar.text_input("RSI (Period)",14)
     display_period(period_view,stock,rsi_period)
-    FinanceStatement_Setup(stock_ticker)
+
+    FinanceStatement_Setup(stock_ticker.upper())
 
     #BackTest Component
     st.sidebar.header('Backtest Strategy')
     ticker = st.sidebar.text_input("Ticker","AAPL")
     stock_bt = yf.Ticker(ticker)
     stock_close = stock_bt.history(period = "5d", interval = "1d")
-
     current_price = st.sidebar.text_input( "Current Price" ,"%.2f" %stock_close.Close[-1])
     backtest_options = ['SMA','Simple RSI']
     backtest_options = st.sidebar.selectbox("Strategies", backtest_options)
@@ -905,6 +906,3 @@ if __name__ == '__main__':
     sell_execution_type = st.sidebar.selectbox("Sell Execution Type",sell_execution)
     st.title("BackTest")
     backtest(backtest_options, stock_bt, ticker,execution_type,sell_execution_type)
-
-
-
