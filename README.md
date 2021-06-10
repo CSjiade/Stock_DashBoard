@@ -1,5 +1,6 @@
-# Stock_Web
-A simple stock web app for having an overview of a stock and backtesting of RSI and Moving Average trading strategies. 
+# Trading DashBoard
+An application for having an overview of a stock's financials, trading data and also backtesting of RSI and Moving Average trading strategies. 
+Just Enter stock ticker and other relevant parameters
 https://stockapp-streamlit.herokuapp.com/
 
 
