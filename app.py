@@ -882,7 +882,7 @@ if __name__ == '__main__':
     img = Image.open(BytesIO(response. content))
     st.image(img, use_column_width=True)
     st.sidebar.header('Enter your Inputs')
-    stock_ticker = st.sidebar.text_input("Stock Ticker", "AAPL")
+    stock_ticker = st.sidebar.text_input("Stock Ticker", "TSM")
     stock = yf.Ticker(stock_ticker)
     period_view = st.sidebar.checkbox('period')
     mv_slow = st.sidebar.text_input("Moving Average (Slow)",5)
@@ -894,11 +894,11 @@ if __name__ == '__main__':
 
     #BackTest Component
     st.sidebar.header('Backtest Strategy')
-    ticker = st.sidebar.text_input("Ticker","AAPL")
+    ticker = st.sidebar.text_input("Ticker","TSM")
     stock_bt = yf.Ticker(ticker)
     stock_close = stock_bt.history(period = "5d", interval = "1d")
     current_price = st.sidebar.text_input( "Current Price" ,"%.2f" %stock_close.Close[-1])
-    backtest_options = ['SMA','Simple RSI']
+    backtest_options = ['SMA','RSI']
     backtest_options = st.sidebar.selectbox("Strategies", backtest_options)
     execution = ["Current Day Close Price", "Next Day Open Price"]
     sell_execution = ["Sell All at Next Open", "Customise Sell"]
