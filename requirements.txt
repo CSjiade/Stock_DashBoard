@@ -1,7 +1,7 @@
 streamlit==0.61.0
 pandas==0.25.3
 numpy==1.18.1
-yfinance == 0.1.55
+yfinance == 0.1.63
 backtrader==1.9.76.123
 yahoofinancials== 1.6
 beautifulsoup4 ==4.9.3
