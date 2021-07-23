@@ -14,6 +14,7 @@ from io import BytesIO
 
 
 
+
 def basic_data(ticker):
 
     yahoo_financials = YahooFinancials(ticker)
@@ -140,7 +141,6 @@ def plot_price_volume(period,interval,data,rsi_period):
 
 def plot_price_volume_2(start, end, interval, data,rsi_period):
     stock_data = data.history(start = start, end = end, interval = interval)
-
     st.subheader('Close Price')
     st.line_chart(stock_data.Close)
     basic_data(stock_ticker)
@@ -315,7 +315,9 @@ def SMA_strategy(start, end, stock_bt,cerebro,initial_amt,trade_size, ticker, bu
     end = end
     start_date = datetime.strptime(start,'%Y-%m-%d')
     end_date = datetime.strptime(end,'%Y-%m-%d')
-    data = bt.feeds.YahooFinanceData(dataname=ticker,fromdate = start_date, todate = end_date+timedelta(1))
+    data = bt.feeds.PandasData(dataname=yf.download(ticker, start_date, end_date, auto_adjust=True))
+
+    #data = bt.feeds.YahooFinanceData(dataname=ticker,fromdate = start_date, todate = end_date+timedelta(1))
     back = cerebro_run(cerebro,data,Cross_MA,initial_amt, trade_size)
     SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period)
 
@@ -511,7 +513,8 @@ def RSI_strategy(start, end, stock_bt,cerebro,initial_amt, trade_size, ticker,bu
     end = end
     start_date = datetime.strptime(start,'%Y-%m-%d')
     end_date = datetime.strptime(end,'%Y-%m-%d')
-    data = bt.feeds.YahooFinanceData(dataname=ticker, fromdate = start_date, todate = end_date)
+    #data = bt.feeds.YahooFinanceData(dataname=ticker, fromdate = start_date, todate = end_date)
+    data = bt.feeds.PandasData(dataname=yf.download(ticker, start_date, end_date, auto_adjust=True))
     back = cerebro_run(cerebro, data, RSIStrategy, initial_amt, trade_size)
     RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period)
 
@@ -860,6 +863,7 @@ def FinanceStatement_Setup(stock_ticker):
 
 
 def cerebro_run(cerebro,data,strategy,initial_amount,trade_size):
+    print(data)
     cerebro.adddata(data)
     cerebro.addstrategy(strategy)
     cerebro.broker.setcash(int(initial_amount))
