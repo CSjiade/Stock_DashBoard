@@ -26,7 +26,7 @@ if __name__ == '__main__':
     rsi_period = st.sidebar.text_input("RSI (Period)",14)
     stock_data = yf.Ticker(stock_ticker)
 
-    stockchart.display_stock(period_view, stock_data, rsi_period, stock_ticker, mv_fast, mv_slow)
+    stockchart.display_stock(period_view, stock_data, rsi_period, stock_ticker.upper(), mv_fast, mv_slow)
     financial.financeStatement_setup(stock_ticker.upper())
 
 
@@ -50,6 +50,6 @@ if __name__ == '__main__':
         backtest_options = st.sidebar.selectbox("Strategies", backtest_options)
         execution_type = st.sidebar.selectbox("Buy Execution Type", execution)
         sell_execution_type = st.sidebar.selectbox("Sell Execution Type", sell_execution)
-        backtest.backtest(backtest_options, stock_bt, ticker,execution_type,sell_execution_type)
+        backtest.backtest(backtest_options, stock_bt, ticker.upper(),execution_type,sell_execution_type)
 
 

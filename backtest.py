@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as pt
 import RSI
 
-
 def cerebro_run(cerebro,data,strategy,initial_amount,trade_size):
     cerebro.adddata(data)
     cerebro.addstrategy(strategy)
@@ -33,7 +32,7 @@ def backtest(options,stock_bt,ticker,execution_type,sell_execution_type):
         sell_percentage = float(sell_percentage)/100
 
     RSI_Period = st.sidebar.text_input("RSI Period", 14)
-    backtest_start = st.sidebar.text_input("Start Period",datetime.strftime(datetime.today()-timedelta(365),"%Y-%m-%d"))
+    backtest_start = st.sidebar.text_input("Start Period",datetime.strftime(datetime.today()-timedelta(365*4),"%Y-%m-%d"))
     backtest_end  = st.sidebar.text_input("End Period",datetime.strftime(datetime.today(),"%Y-%m-%d"))
     buy_n_hold  = st.sidebar.checkbox("Buy and Hold")
     trade_size = st.sidebar.text_input("Lot Size for 1 transaction", 1000)
@@ -42,7 +41,7 @@ def backtest(options,stock_bt,ticker,execution_type,sell_execution_type):
     if (options=='SMA'):
         SMA_strategy(backtest_start, backtest_end,stock_bt,cerebro, initial_amount,trade_size,ticker,buy_n_hold,RSI_Period,execution_type,sell_execution_type,sell_percentage)
 
-    if(options == 'Simple RSI'):
+    if(options == 'RSI'):
         RSI_strategy(backtest_start, backtest_end,stock_bt,cerebro, initial_amount,trade_size,ticker,buy_n_hold,RSI_Period,execution_type,sell_execution_type,sell_percentage)
 
 
@@ -94,11 +93,15 @@ def SMA_strategy(start, end, stock_bt,cerebro,initial_amt,trade_size, ticker, bu
 
     start = start
     end = end
+
     start_date = datetime.strptime(start,'%Y-%m-%d')
     end_date = datetime.strptime(end,'%Y-%m-%d')
-    data = bt.feeds.PandasData(dataname= yf.download(ticker, start_date, end_date, auto_adjust=True))
 
-    #data = bt.feeds.YahooFinanceData(dataname=ticker,fromdate = start_date, todate = end_date+timedelta(1))
+
+    data = bt.feeds.YahooFinanceData(dataname=ticker,
+                                 fromdate=start_date,
+                                 todate=end_date)
+
     back = cerebro_run(cerebro, data, Cross_MA, initial_amt, trade_size)
     SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period)
 
@@ -107,6 +110,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period):
     cashDelta_list = []
     date_list = []
     stock_qty = []
+    print(back[0].analyzers.transaction.get_analysis().items())
     date_column = np.arange(np.datetime64(start), np.datetime64(end))
     for key, value in back[0].analyzers.transaction.get_analysis().items():
         str_date = str(key).split()
@@ -289,8 +293,12 @@ def RSI_strategy(start, end, stock_bt,cerebro,initial_amt, trade_size, ticker,bu
     end = end
     start_date = datetime.strptime(start,'%Y-%m-%d')
     end_date = datetime.strptime(end,'%Y-%m-%d')
-    #data = bt.feeds.YahooFinanceData(dataname=ticker, fromdate = start_date, todate = end_date)
-    data = bt.feeds.PandasData(dataname=yf.download(ticker, start_date, end_date, auto_adjust=True))
+
+
+    data = bt.feeds.YahooFinanceData(dataname=ticker,
+                                 fromdate=start_date,
+                                 todate=end_date)
+    #data = bt.feeds.PandasData(dataname=yf.download(ticker, start_date, end_date, auto_adjust=True))
     back = cerebro_run(cerebro, data, RSIStrategy, initial_amt, trade_size)
     RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period)
 
