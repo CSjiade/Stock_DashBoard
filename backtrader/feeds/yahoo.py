@@ -276,6 +276,7 @@ class YahooFinanceData(YahooFinanceCSVData):
 
             txt = resp.text
             i = txt.find('CrumbStore')
+
             if i == -1:
                 continue
             i = txt.find('crumb', i)
@@ -297,6 +298,7 @@ class YahooFinanceData(YahooFinanceCSVData):
             self.error = 'Crumb not found'
             self.f = None
             return
+
 
         crumb = urlquote(crumb)
 

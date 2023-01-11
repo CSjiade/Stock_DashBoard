@@ -98,9 +98,16 @@ def SMA_strategy(start, end, stock_bt,cerebro,initial_amt,trade_size, ticker, bu
     end_date = datetime.strptime(end,'%Y-%m-%d')
 
 
-    data = bt.feeds.YahooFinanceData(dataname=ticker,
-                                 fromdate=start_date,
-                                 todate=end_date)
+    # data = bt.feeds.YahooFinanceData(dataname=ticker,
+    #                              fromdate=start_date,
+    #                              todate=end_date)
+
+
+    dataframe = yf.download(ticker, start=start_date, end=end_date)
+
+    data = bt.feeds.PandasData(dataname=dataframe, name=ticker)
+
+
 
     back = cerebro_run(cerebro, data, Cross_MA, initial_amt, trade_size)
     SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period)
@@ -454,4 +461,8 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period):
 
     st.subheader("RSI Graph")
     st.line_chart(RSI_df_Graph.RSI)
+
+
+
+
 
