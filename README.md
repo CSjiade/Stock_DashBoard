@@ -3,6 +3,8 @@ A personal data project for having an overview of a stock's financials, trading 
 Just Enter stock ticker and other relevant parameters
 https://stockapp-streamlit.herokuapp.com/
 
+**Running on local host:**
+clone the repo and run `streamlit run app.py`
 
 
 **Reminder:**
