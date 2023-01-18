@@ -4,6 +4,6 @@ numpy==1.18.1
 yfinance==0.1.63
 backtrader==1.9.76.123
 yahoofinancials==1.9
-beautifulsoup4 ==4.9.3
+beautifulsoup4==4.11.1
 matplotlib==3.2.1
 backtrader2==1.9.76.123
