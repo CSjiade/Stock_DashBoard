@@ -7,6 +7,8 @@ from yahoofinancials import YahooFinancials
 
 
 def financeStatement_setup(stock_ticker):
+
+
     yhfin = YahooFinancials(stock_ticker)
     annual_fin = yhfin.get_financial_stmts('annual', 'income')
     date = []
@@ -21,10 +23,21 @@ def financeStatement_setup(stock_ticker):
     income_margin = []
     int_coverage = []
     million = 1000000
+    
+    
+    print(annual_fin['incomeStatementHistory'][stock_ticker])
+    
+    
+    
+    #remove quaterly data
+    annual_fin_data = annual_fin['incomeStatementHistory'][stock_ticker]
+    annual_fin_data.pop()
 
-    for x in annual_fin['incomeStatementHistory'][stock_ticker]:
+    for x in annual_fin_data:
         data = list(x.items())
         date.append(data[0][0])
+        
+        
 
         rev_data = data[0][1]['totalRevenue']
         if rev_data is None or rev_data ==0:
@@ -61,7 +74,7 @@ def financeStatement_setup(stock_ticker):
                 ebit_margin_data = np.nan
             ebit_margin.append(ebit_margin_data)
 
-        int_exp_data = data[0][1]['interestExpense']
+        int_exp_data = -data[0][1]['interestExpense']
         if int_exp_data is None or int_exp_data==0:
             int_exp_data = np.nan
             int_exp.append(int_exp_data)
@@ -94,46 +107,50 @@ def financeStatement_setup(stock_ticker):
     CFI = []
     net_debt = []
     stock_issuance = []
+    
+    
+    annual_cf_data = annual_cf['cashflowStatementHistory'][stock_ticker]
+    annual_cf_data.pop()
 
-    for x in annual_cf['cashflowStatementHistory'][stock_ticker]:
+    for x in annual_cf_data:
         data = list(x.items())
 
         try:
-            da.append(data[0][1]['depreciation']/million)
+            da.append(data[0][1]['depreciationAndAmortization']/million)
         except KeyError:
             da.append(np.nan)
 
         try:
-            capex.append(data[0][1]['capitalExpenditures']/million)
+            capex.append(data[0][1]['capitalExpenditure']/million)
         except KeyError:
             capex.append(np.nan)
 
         try:
-            divd.append(data[0][1]['dividendsPaid']/million)
+            divd.append(data[0][1]['cashDividendsPaid']/million)
         except KeyError:
             divd.append(np.nan)
 
         try:
-            CFO.append(data[0][1]['totalCashFromOperatingActivities']/million)
+            CFO.append(data[0][1]['cashFlowFromContinuingOperatingActivities']/million)
         except KeyError:
             CFO.append(np.nan)
         try:
-            CFF.append(data[0][1]['totalCashFromFinancingActivities']/million)
+            CFF.append(data[0][1]['cashFlowFromContinuingFinancingActivities']/million)
         except KeyError:
             CFF.append(np.nan)
         try:
-            CFI.append(data[0][1]['totalCashflowsFromInvestingActivities']/million)
+            CFI.append(data[0][1]['cashFlowFromContinuingInvestingActivities']/million)
         except KeyError:
             CFI.append(np.nan)
 
         try:
-            stock_issuance.append(data[0][1]['issuanceOfStock']/million +
-                                  data[0][1]['repurchaseOfStock']/million)
+            stock_issuance.append(data[0][1]['netCommonStockIssuance']/million +
+                                  data[0][1]['repurchaseOfCapitalStock']/million)
         except KeyError:
             stock_issuance.append(np.nan)
 
         try:
-            net_debt.append(data[0][1]['netBorrowings']/million)
+            net_debt.append(data[0][1]['netIssuancePaymentsOfDebt']/million)
         except KeyError:
             net_debt.append(np.nan)
 
