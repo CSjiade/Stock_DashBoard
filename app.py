@@ -6,7 +6,8 @@ from io import BytesIO
 import financial
 import stockchart
 import backtest
-
+import pandas as pd
+from datetime import datetime, timedelta
 
 if __name__ == '__main__':
 
@@ -25,8 +26,21 @@ if __name__ == '__main__':
     mv_fast = st.sidebar.text_input("Moving Average (Fast)",25)
     rsi_period = st.sidebar.text_input("RSI (Period)",14)
     stock_data = yf.Ticker(stock_ticker)
-
     stockchart.display_stock(period_view, stock_data, rsi_period, stock_ticker.upper(), mv_fast, mv_slow)
+   
+    stock_data_holders  = stock_data.institutional_holders
+    stock_data_holders['Shares'] = stock_data_holders['Shares'].apply(lambda x: x/1000000)
+    stock_data_holders['Value'] = stock_data_holders['Value'].apply(lambda x: x/1000000)
+    stock_data_holders['pctHeld'] = stock_data_holders['pctHeld'].apply(lambda x: x*100)
+    stock_data_holders = stock_data_holders.rename(
+            {'Shares': 'Shares (M)',
+             'pctHeld': 'Holdings (%)',
+             'Value': 'Value (M)'
+            }, 
+            axis='columns')
+    st.subheader('Largest Holders') 
+    stock_data_holders['Date Reported'] = stock_data_holders["Date Reported"].dt.strftime('%Y-%m-%d')
+    st.dataframe( stock_data_holders, hide_index=True)
     financial.financeStatement_setup(stock_ticker.upper())
 
 

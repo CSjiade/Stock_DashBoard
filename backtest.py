@@ -35,7 +35,7 @@ def backtest(options,stock_bt,ticker,execution_type,sell_execution_type):
     backtest_start = st.sidebar.text_input("Start Period",datetime.strftime(datetime.today()-timedelta(365*4),"%Y-%m-%d"))
     backtest_end  = st.sidebar.text_input("End Period",datetime.strftime(datetime.today(),"%Y-%m-%d"))
     buy_n_hold  = st.sidebar.checkbox("Buy and Hold")
-    trade_size = st.sidebar.text_input("Lot Size for 1 transaction", 1000)
+    trade_size = st.sidebar.text_input("Lot Size for 1 transaction", 100)
     initial_amount = st.sidebar.text_input("Initial Cash",100000)
 
     if (options=='SMA'):
@@ -167,6 +167,9 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period):
     stock_data  = stock_data .reset_index()
     data={'date':stock_data ['Date'],'close': stock_data ['Close']}
     final_data =pd.DataFrame(data=data)
+
+    final_data['date'] = pd.to_datetime(final_data["date"].dt.strftime('%Y-%m-%d'))
+
     final_df = df.merge(final_data,"inner",'date')
 
     final_df['final_pnl'] = final_df['Stock_Quantity'] * final_df['close'] + final_df['trade_pnl']
@@ -302,10 +305,14 @@ def RSI_strategy(start, end, stock_bt,cerebro,initial_amt, trade_size, ticker,bu
     end_date = datetime.strptime(end,'%Y-%m-%d')
 
 
-    data = bt.feeds.YahooFinanceData(dataname=ticker,
-                                 fromdate=start_date,
-                                 todate=end_date)
-    #data = bt.feeds.PandasData(dataname=yf.download(ticker, start_date, end_date, auto_adjust=True))
+   # data = bt.feeds.YahooFinanceData(dataname=ticker,
+   #                              fromdate=start_date,
+   #                              todate=end_date)
+    
+
+ 
+
+    data = bt.feeds.PandasData(dataname=yf.download(ticker, start_date, end_date, auto_adjust=True))
     back = cerebro_run(cerebro, data, RSIStrategy, initial_amt, trade_size)
     RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period)
 
@@ -369,6 +376,8 @@ def RSI_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period):
     data={'date':stock_data ['Date'],'close': stock_data ['Close']}
 
     final_data =pd.DataFrame(data=data)
+
+    final_data['date'] = pd.to_datetime(final_data["date"].dt.strftime('%Y-%m-%d'))
     final_df = df.merge(final_data,"inner",'date')
 
     final_df['final_pnl'] = final_df['Stock_Quantity'] * final_df['close'] + final_df['trade_pnl']

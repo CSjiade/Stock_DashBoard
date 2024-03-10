@@ -6,30 +6,51 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as pt
 import RSI
 import file
-
+import yfinance as yf
 
 def basic_data(ticker):
+ 
+    #yahoo_financials = YahooFinancials(ticker)
+    
+    yahoo_financials= yf.Ticker(ticker)
 
-    yahoo_financials = YahooFinancials(ticker)
-    ps = yahoo_financials.get_price_to_sales()
+    print(yahoo_financials)
+
+
+    ps = yahoo_financials.info['priceToSalesTrailing12Months']
     if ps is None:
         ps = np.nan
-    pe = yahoo_financials.get_pe_ratio()
+    pe = yahoo_financials.info['forwardPE']
     if pe is None:
         pe = np.nan
-    mktcap = yahoo_financials.get_market_cap()
-    divd = yahoo_financials.get_dividend_yield()
+    mktcap = yahoo_financials.info['marketCap']
+    divd = yahoo_financials.info['dividendYield'] * 100
     if divd is None:
         divd = np.nan
-    high = yahoo_financials.get_yearly_high()
-    low = yahoo_financials.get_yearly_low()
-    beta = yahoo_financials.get_beta()
+    high = yahoo_financials.info['fiftyTwoWeekHigh']
+    low = yahoo_financials.info['fiftyTwoWeekLow']
+    beta = yahoo_financials.info['beta']
     if beta is None:
         beta = np.nan
-    df = {'P/S': [ps], 'P/E': [pe], 'Beta': [beta],
-         'Mktcap(M)': [mktcap/1000000], 'Dividend yield %': [divd],
+
+    pb = yahoo_financials.info['priceToBook']
+    if pb is None:
+        pb  = np.nan
+
+    short = yahoo_financials.info['shortPercentOfFloat'] * 100
+    if short is None:
+        short  = np.nan
+    
+
+    df = {'P/S': [ps],
+          'P/E': [pe],
+          'P/B': [pb],
+          'Beta': [beta],
+         'Mktcap(M)': [mktcap/1000000],
+          'Dividend yield %': [divd],
           'Yearly High': [high],
-          'Yearly Low': [low]
+          'Yearly Low': [low],
+          'Shares Short %': [short]
 
     }
     index = ['Data']
@@ -103,7 +124,10 @@ def plot_price_volume(period, interval, data, rsi_period, stock_ticker, mv_fast,
 
 
 def plot_price_volume_2(start, end, interval, data, rsi_period, stock_ticker, mv_fast, mv_slow):
+    
+
     stock_data = data.history(start = start, end = end, interval = interval)
+    
     st.subheader('Close Price')
     st.line_chart(stock_data.Close)
     basic_data(stock_ticker)
