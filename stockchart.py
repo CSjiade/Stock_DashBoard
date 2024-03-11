@@ -14,9 +14,9 @@ def basic_data(ticker):
     
     yahoo_financials= yf.Ticker(ticker)
 
-    print(yahoo_financials)
+    print(yahoo_financials.info)
 
-
+    
     ps = yahoo_financials.info['priceToSalesTrailing12Months']
     if ps is None:
         ps = np.nan
@@ -24,13 +24,22 @@ def basic_data(ticker):
     if pe is None:
         pe = np.nan
     mktcap = yahoo_financials.info['marketCap']
-    divd = yahoo_financials.info['dividendYield'] * 100
-    if divd is None:
+    
+    try:
+        divd = yahoo_financials.info['dividendYield'] * 100
+        if divd is None:
+            divd = np.nan
+    except:
         divd = np.nan
+        
     high = yahoo_financials.info['fiftyTwoWeekHigh']
     low = yahoo_financials.info['fiftyTwoWeekLow']
-    beta = yahoo_financials.info['beta']
-    if beta is None:
+    
+    try:
+        beta = yahoo_financials.info['beta']
+        if beta is None:
+            beta = np.nan
+    except:
         beta = np.nan
 
     pb = yahoo_financials.info['priceToBook']
