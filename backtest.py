@@ -175,7 +175,7 @@ def SMA_Visualisation(back,start,end,stock_bt,cerebro,initial_amt,RSI_Period):
     final_df['final_pnl'] = final_df['Stock_Quantity'] * final_df['close'] + final_df['trade_pnl']
     final_df = final_df.set_index('date')
     fig = pt.figure(figsize=(8, 5))
-    st.subheader("PNL of BackTest")
+    st.subheader("Proft & Loss of Trade Simulation")
     pt.plot(final_df.final_pnl)
     st.pyplot(fig)
 
